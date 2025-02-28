@@ -40,8 +40,7 @@
     </div>
 
     <script>
-        const sheetID = "1D12xYmBj77eknp9mlDle50woqfgxOZZhSVICaT__8hc"; 
-        const apiKey = "AIzaSyDAeNxZy9t09fSqe2q-0y-4q-hMWYtQ0fQ";
+        const scriptURL = "https://docs.google.com/spreadsheets/d/1D12xYmBj77eknp9mlDle50woqfgxOZZhSVICaT__8hc/edit?usp=sharing"; // Replace with your actual Google Apps Script Web App URL
         let selectedFeeling = "";
 
         function selectFeeling(feeling) {
@@ -64,11 +63,10 @@
             }
 
             const timestamp = new Date().toLocaleString();
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/Love%20Messages!A1:append?valueInputOption=RAW&key=${apiKey}`;
-            const data = { values: [[selectedFeeling, message, timestamp]] };
+            const data = { feeling: selectedFeeling, message: message, timestamp: timestamp };
 
             try {
-                const response = await fetch(url, {
+                const response = await fetch(scriptURL, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(data)
