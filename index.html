@@ -40,7 +40,7 @@
     </div>
 
     <script>
-        const scriptURL = "https://script.google.com/macros/s/AKfycbzqNQDd4KlLNMV9FEKvmpLUZr4zY9GYafx4FX4RmSLGAPzDHT1NvOahEfCvDb5WBUMD/exec"; // Replace with your actual Google Apps Script Web App URL
+        const scriptURL = "https://script.google.com/macros/s/AKfycbzqNQDd4KlLNMV9FEKvmpLUZr4zY9GYafx4FX4RmSLGAPzDHT1NvOahEfCvDb5WBUMD/exec"; // Replace with your new Web App URL
         let selectedFeeling = "";
 
         function selectFeeling(feeling) {
@@ -72,14 +72,17 @@
                     body: JSON.stringify(data)
                 });
 
-                if (response.ok) {
+                const result = await response.json();
+
+                if (result.status === "success") {
                     displayMessage(selectedFeeling, message, timestamp);
                     document.getElementById("message").value = "";
                 } else {
-                    alert("Failed to save message.");
+                    alert("Failed to save message: " + result.message);
                 }
             } catch (error) {
                 console.error("Error:", error);
+                alert("Failed to connect to server.");
             }
         }
 
