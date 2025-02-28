@@ -12,41 +12,48 @@
         .miss { background: #3f51b5; color: white; }
         .angry { background: #ff9800; color: white; }
         .confess { background: #4caf50; color: white; }
+        .hidden { display: none; }
         textarea { width: 80%; height: 100px; padding: 10px; margin-top: 10px; }
-        button { padding: 10px 20px; background: red; color: white; border: none; cursor: pointer; margin-top: 10px; }
+        button { padding: 10px 20px; background: red; color: white; border: none; cursor: pointer; }
         .messages { margin-top: 20px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto; }
         .msg { background: white; padding: 10px; margin: 5px; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-    <h1>LOVE FOR LIFE ❤️</h1>
-
-    <div id="homePage">
-        <button class="btn love" onclick="navigate('LOVE YOU')">LOVE YOU</button>
-        <button class="btn miss" onclick="navigate('MISS YOU')">MISS YOU</button>
-        <button class="btn angry" onclick="navigate('ANGRY')">ANGRY</button>
-        <button class="btn confess" onclick="navigate('CONFESSION')">CONFESSION</button>
+    <!-- Home Page -->
+    <div id="home">
+        <h1>LOVE FOR LIFE ❤️</h1>
+        <button class="btn love" onclick="selectFeeling('LOVE YOU')">LOVE YOU</button>
+        <button class="btn miss" onclick="selectFeeling('MISS YOU')">MISS YOU</button>
+        <button class="btn angry" onclick="selectFeeling('ANGRY')">ANGRY</button>
+        <button class="btn confess" onclick="selectFeeling('CONFESSION')">CONFESSION</button>
     </div>
 
-    <div id="feelingsPage" style="display: none;">
-        <h1 id="title">Your Feelings ❤️</h1>
+    <!-- Message Page -->
+    <div id="messagePage" class="hidden">
+        <h1 id="title"></h1>
         <textarea id="message" placeholder="Write your feelings..."></textarea><br>
         <button onclick="sendMessage()">Add</button>
+        <button onclick="goBack()">Back</button>
         <div class="messages" id="messageList"></div>
     </div>
 
     <script>
-        const sheetID = "1D12xYmBj77eknp9mlDle50woqfgxOZZhSVICaT__8hc";
+        const sheetID = "1D12xYmBj77eknp9mlDle50woqfgxOZZhSVICaT__8hc"; 
         const apiKey = "AIzaSyDAeNxZy9t09fSqe2q-0y-4q-hMWYtQ0fQ";
-        let feelingType = "";
+        let selectedFeeling = "";
 
-        function navigate(feeling) {
-            feelingType = feeling;
-            document.getElementById("title").innerText = feeling.toUpperCase() + " ❤️";
-            document.getElementById("homePage").style.display = "none";
-            document.getElementById("feelingsPage").style.display = "block";
-            loadMessages();
+        function selectFeeling(feeling) {
+            selectedFeeling = feeling;
+            document.getElementById("title").innerText = feeling + " ❤️";
+            document.getElementById("home").classList.add("hidden");
+            document.getElementById("messagePage").classList.remove("hidden");
+        }
+
+        function goBack() {
+            document.getElementById("messagePage").classList.add("hidden");
+            document.getElementById("home").classList.remove("hidden");
         }
 
         async function sendMessage() {
@@ -57,8 +64,8 @@
             }
 
             const timestamp = new Date().toLocaleString();
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/1D12xYmBj77eknp9mlDle50woqfgxOZZhSVICaT__8hc/values/Love Messages!A1:append?valueInputOption=RAW&key=AIzaSyDAeNxZy9t09fSqe2q-0y-4q-hMWYtQ0fQ`;
-            const data = { values: [[feelingType, message, timestamp]] };
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/Love%20Messages!A1:append?valueInputOption=RAW&key=${apiKey}`;
+            const data = { values: [[selectedFeeling, message, timestamp]] };
 
             try {
                 const response = await fetch(url, {
@@ -68,7 +75,7 @@
                 });
 
                 if (response.ok) {
-                    displayMessage(feelingType, message, timestamp);
+                    displayMessage(selectedFeeling, message, timestamp);
                     document.getElementById("message").value = "";
                 } else {
                     alert("Failed to save message.");
@@ -84,26 +91,6 @@
             newMsg.classList.add("msg");
             newMsg.innerHTML = `<strong>${type.toUpperCase()}:</strong> ${message} <br><small>${timestamp}</small>`;
             messageList.prepend(newMsg);
-        }
-
-        async function loadMessages() {
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/Sheet1!A:C?key=${apiKey}`;
-
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                const messages = data.values || [];
-
-                document.getElementById("messageList").innerHTML = "";
-
-                messages.forEach(([type, message, timestamp]) => {
-                    if (type === feelingType) {
-                        displayMessage(type, message, timestamp);
-                    }
-                });
-            } catch (error) {
-                console.error("Error loading messages:", error);
-            }
         }
     </script>
 
