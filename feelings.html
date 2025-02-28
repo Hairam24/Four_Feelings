@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Express Your Feelings</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; background-color: #ffebee; padding: 20px; }
+        h1 { color: #d32f2f; }
+        textarea { width: 80%; height: 100px; padding: 10px; margin-top: 10px; }
+        button { padding: 10px 20px; background: red; color: white; border: none; cursor: pointer; }
+        .messages { margin-top: 20px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .msg { background: white; padding: 10px; margin: 5px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <h1 id="title">Your Feelings ❤️</h1>
+    <textarea id="message" placeholder="Write your feelings..."></textarea><br>
+    <button onclick="sendMessage()">Add</button>
+
+    <div class="messages" id="messageList"></div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const feelingType = urlParams.get('type');
+        document.getElementById("title").innerText = feelingType.toUpperCase() + " ❤️";
+
+        const sheetID = "<<SHEET_ID>>"; // Replace with Google Sheet ID
+        const apiKey = "<<YOUR_API_KEY>>"; // Replace with your Google API Key
+
+        async function sendMessage() {
+            const message = document.getElementById("message").value;
+            if (message.trim() === "") {
+                alert("Please write a message first!");
+                return;
+            }
+
+            const timestamp = new Date().toLocaleString();
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/A1:append?valueInputOption=RAW&key=${apiKey}`;
+            const data = { values: [[feelingType, message, timestamp]] };
+
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    displayMessage(feelingType, message, timestamp);
+                    document.getElementById("message").value = "";
+                } else {
+                    alert("Failed to save message.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        function displayMessage(type, message, timestamp) {
+            const messageList = document.getElementById("messageList");
+            const newMsg = document.createElement("div");
+            newMsg.classList.add("msg");
+            newMsg.innerHTML = `<strong>${type.toUpperCase()}:</strong> ${message} <br><small>${timestamp}</small>`;
+            messageList.prepend(newMsg);
+        }
+    </script>
+
+</body>
+</html>
