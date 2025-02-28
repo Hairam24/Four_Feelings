@@ -56,35 +56,37 @@
         }
 
         async function sendMessage() {
-            const message = document.getElementById("message").value;
-            if (message.trim() === "") {
-                alert("Please write a message first!");
-                return;
-            }
+    const message = document.getElementById("message").value.trim();
+    if (message === "") {
+        alert("Please write a message first!");
+        return;
+    }
 
-            const timestamp = new Date().toLocaleString();
-            const data = { feeling: selectedFeeling, message: message, timestamp: timestamp };
+    const timestamp = new Date().toLocaleString();
+    const data = { feeling: selectedFeeling, message: message, timestamp: timestamp };
 
-            try {
-                const response = await fetch(scriptURL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(data)
-                });
+    try {
+        const response = await fetch(scriptURL, {
+            method: "POST",
+            mode: "cors", // Ensures cross-origin requests are allowed
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
 
-                const result = await response.json();
+        const result = await response.json();
 
-                if (result.status === "success") {
-                    displayMessage(selectedFeeling, message, timestamp);
-                    document.getElementById("message").value = "";
-                } else {
-                    alert("Failed to save message: " + result.message);
-                }
-            } catch (error) {
-                console.error("Error:", error);
-                alert("Failed to connect to server.");
-            }
+        if (result.status === "success") {
+            displayMessage(selectedFeeling, message, timestamp);
+            document.getElementById("message").value = "";
+        } else {
+            alert("Failed to save message: " + result.message);
         }
+    } catch (error) {
+        console.error("Fetch Error:", error);
+        alert("Failed to connect to server. Check console for details.");
+    }
+}
+
 
         function displayMessage(type, message, timestamp) {
             const messageList = document.getElementById("messageList");
